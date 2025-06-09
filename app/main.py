@@ -3,6 +3,7 @@ from fastapi import FastAPI
 from app.src.routes.orm_infused.post import posts_router
 from app.src.routes.orm_infused.auth import auth_router
 from app.src.routes.orm_infused.dashboard import dashbord_router
+from app.src.routes.websocket.websocket_route import websocket_router
 from app.src.connection.orm.ormDatabase import engine
 from app.src.models.models import Base
 from fastapi.middleware.cors import CORSMiddleware
@@ -30,3 +31,4 @@ def read_root():
 app.include_router(posts_router)
 app.include_router(auth_router)
 app.include_router(dashbord_router)
+app.include_router(websocket_router)

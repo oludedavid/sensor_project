@@ -6,6 +6,9 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { deleteCookie } from "cookies-next";
 import useApiRequest from "@/hooks/usefectchData";
+import useWebSocket from "@/hooks/useWebsocket";
+
+const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
 export default function Dashboard() {
   const { isAuthenticated, loading, user, setUser } = useAuth();
@@ -14,6 +17,10 @@ export default function Dashboard() {
     dashboard_id: number;
     owner_id: number;
   } | null>(null);
+
+  const { isConnected, error: websocketError } = useWebSocket(
+    `${API_URL}/sensor`
+  );
 
   const { execute, loading: dashboardLoading } = useApiRequest<{
     dashboard_id: number;
@@ -76,6 +83,15 @@ export default function Dashboard() {
                 {isAuthenticated ? "Authenticated" : "Not Authenticated"}
               </p>
             </div>
+
+            {isConnected ? (
+              <p className="text-green-500">Web socket is also connected!</p>
+            ) : (
+              <div className="text-red-400">
+                <p>Not connected</p>
+                <p>{websocketError}</p>
+              </div>
+            )}
 
             {user && (
               <div className="bg-green-50 p-4 rounded-lg">
