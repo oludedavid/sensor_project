@@ -25,7 +25,8 @@ export default function useApiRequest<T = Record<string, unknown>>() {
       const headers: Record<string, string> = {};
 
       if (requiresAuth) {
-        const token = getCookie("access-token");
+        const token = getCookie("access_token");
+        console.log(token);
         if (!token) throw new Error("Missing authentication token");
         headers.Authorization = `Bearer ${token}`;
       }
@@ -34,6 +35,7 @@ export default function useApiRequest<T = Record<string, unknown>>() {
         method,
         url,
         headers,
+        withCredentials: true, // ✅ Add this
         ...(method === "GET" && payload
           ? { params: payload }
           : { data: payload }),

@@ -57,6 +57,30 @@ def get_all_users(db: Session = Depends(get_db)):
       "data": users,
       "status_code": status.HTTP_200_OK
     }
+@auth_router.get("/users/me", dependencies=[Depends(JWTBearer())], response_model=UserProfile)
+def get_user_profile(
+    token_data: dict = Depends(JWTBearer()),
+    db: Session = Depends(get_db)
+):
+    user_id = token_data.get("user_id")
+    if not user_id:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Not authorized"
+        )
+
+    user = db.query(User).filter_by(user_id=user_id).first()
+
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="User not found"
+        )
+
+    return {
+        "user_id": user.user_id,
+        "role": str(user.role.role_name),
+    }
 
 @auth_router.get("/users/{user_id}", response_model=UserSingleResponse)
 def get_user_by_id(user_id: int, db: Session = Depends(get_db)):
@@ -161,27 +185,3 @@ def login_in_users(user: UserLoginRequest, db: Session = Depends(get_db)):
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Internal server error"
         )
-@auth_router.get("/users/me", dependencies=[Depends(JWTBearer())], response_model=UserProfile)
-def get_user_profile(
-    token_data: dict = Depends(JWTBearer()),
-    db: Session = Depends(get_db)
-):
-    user_id = token_data.get("user_id")
-    if not user_id:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Not authorized"
-        )
-
-    user = db.query(User).filter_by(user_id=user_id).first()
-
-    if not user:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="User not found"
-        )
-
-    return {
-        "user_id": user.user_id,
-        "role": user.role,
-    }

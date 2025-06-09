@@ -7,7 +7,7 @@ import lodash from "lodash";
 import { setCookie } from "cookies-next";
 import { useRouter } from "next/navigation";
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL;
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000";
 
 type TLoginResponse = {
   access_token: string;
@@ -30,7 +30,7 @@ type TRegister = {
 };
 
 export default function Home() {
-  const { isAuthenticated, loading: authLoading } = useAuth();
+  const { isAuthenticated, loading: authLoading, setUser } = useAuth();
   const router = useRouter();
 
   // Separate state for form toggle (true = register, false = login)
@@ -104,8 +104,16 @@ export default function Home() {
       });
 
       if (response?.access_token) {
-        setCookie("access-token", response.access_token);
-        // Note: You might want to update auth context here too
+        setCookie("access_token", response.access_token);
+
+        const profile = await executeLogin({
+          url: `${API_URL}/users/me`,
+          method: "GET",
+          requiresAuth: true,
+        });
+
+        setUser(profile); // ✅ immediately update auth context
+
         router.push("/dashboard");
       } else {
         alert("Login failed. Please try again.");

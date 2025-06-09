@@ -1,7 +1,7 @@
 import { createContext, useContext, useEffect, useState } from "react";
 import useApiRequest from "@/hooks/usefectchData";
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL;
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:8000";
 
 type User = {
   user_id: number;
@@ -12,12 +12,14 @@ type AuthContextType = {
   user: User | null;
   isAuthenticated: boolean;
   loading: boolean;
+  setUser: (user: User | null) => void; // ✅ Add this to the context
 };
 
 const AuthContext = createContext<AuthContextType>({
   user: null,
   isAuthenticated: false,
   loading: true,
+  setUser: () => {}, // empty default
 });
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
@@ -54,6 +56,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     user,
     isAuthenticated: !!user,
     loading,
+    setUser, // ✅ Provide setUser
   };
 
   return (

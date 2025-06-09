@@ -1,9 +1,11 @@
+"use client";
 import { useAuth } from "@/context/authContext";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
+import { deleteCookie } from "cookies-next";
 
 export default function Dashboard() {
-  const { isAuthenticated, loading, user } = useAuth();
+  const { isAuthenticated, loading, user, setUser } = useAuth();
   const router = useRouter();
 
   useEffect(() => {
@@ -72,8 +74,9 @@ export default function Dashboard() {
                 </button>
                 <button
                   onClick={() => {
-                    // Add logout functionality here
-                    console.log("Logout clicked");
+                    deleteCookie("access_token");
+                    setUser(null); // 🧠 Reset the user in AuthContext
+                    router.push("/");
                   }}
                   className="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition-colors"
                 >
