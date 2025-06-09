@@ -1,7 +1,7 @@
 from fastapi import APIRouter, status, HTTPException, Depends
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
-from app.src.models.models import User, Role
+from app.src.models.models import User, Role, Dashboard
 from app.src.schemas.roleEnum import RoleEnum
 from app.src.schemas.readUser import UserListResponse, UserSingleResponse, ReadUserResponse
 from app.src.schemas.createUser import CreateUserRequest 
@@ -125,6 +125,12 @@ def create_a_user(user_payload: CreateUserRequest, db: Session = Depends(get_db)
         db.commit()
         db.refresh(new_user)
 
+        #maybe we create the dashboard here or we could dare say an account but dashboard
+        new_dashboard = Dashboard(owner_id=new_user.user_id)
+        db.add(new_dashboard)
+        db.commit()
+        db.refresh(new_dashboard)
+
         return {
             "data": new_user,
             "status_code": status.HTTP_201_CREATED
@@ -185,3 +191,4 @@ def login_in_users(user: UserLoginRequest, db: Session = Depends(get_db)):
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Internal server error"
         )
+

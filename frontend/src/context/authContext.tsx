@@ -13,14 +13,14 @@ type AuthContextType = {
   user: User | null;
   isAuthenticated: boolean;
   loading: boolean;
-  setUser: (user: User | null) => void; // ✅ Add this to the context
+  setUser: (user: User | null) => void;
 };
 
 const AuthContext = createContext<AuthContextType>({
   user: null,
   isAuthenticated: false,
   loading: true,
-  setUser: () => {}, // empty default
+  setUser: () => {},
 });
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
@@ -57,7 +57,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     user,
     isAuthenticated: !!user,
     loading,
-    setUser, // ✅ Provide setUser
+    setUser,
   };
 
   return (

@@ -33,7 +33,6 @@ export default function Home() {
   const { isAuthenticated, loading: authLoading, setUser } = useAuth();
   const router = useRouter();
 
-  // Separate state for form toggle (true = register, false = login)
   const [showRegister, setShowRegister] = useState(false);
 
   const { execute: executeRegister, loading: registerLoading } =
@@ -112,7 +111,7 @@ export default function Home() {
           requiresAuth: true,
         });
 
-        setUser(profile); // ✅ immediately update auth context
+        setUser(profile);
 
         router.push("/dashboard");
       } else {
@@ -137,7 +136,7 @@ export default function Home() {
 
       if (response?.status_code === 201) {
         alert("Registration successful! Please login.");
-        setShowRegister(false); // Switch to login form
+        setShowRegister(false);
       } else {
         alert("Registration failed. Please try again.");
       }
