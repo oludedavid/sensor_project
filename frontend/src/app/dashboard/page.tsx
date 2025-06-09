@@ -1,21 +1,53 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 "use client";
+
 import { useAuth } from "@/context/authContext";
 import { useRouter } from "next/navigation";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { deleteCookie } from "cookies-next";
+import useApiRequest from "@/hooks/usefectchData";
 
 export default function Dashboard() {
   const { isAuthenticated, loading, user, setUser } = useAuth();
   const router = useRouter();
+  const [dashboard, setDashboard] = useState<{
+    dashboard_id: number;
+    owner_id: number;
+  } | null>(null);
 
+  const { execute, loading: dashboardLoading } = useApiRequest<{
+    dashboard_id: number;
+    owner_id: number;
+  }>();
+
+  // Redirect unauthenticated users to login
   useEffect(() => {
-    // Redirect unauthenticated users to login
     if (!loading && !isAuthenticated) {
       router.push("/");
     }
   }, [isAuthenticated, loading, router]);
 
-  if (loading) {
+  // Fetch dashboard if authenticated
+  useEffect(() => {
+    const fetchDashboard = async () => {
+      try {
+        const data = await execute({
+          url: `${process.env.NEXT_PUBLIC_API_URL}/dashboard`,
+          method: "GET",
+          requiresAuth: true,
+        });
+        setDashboard(data);
+      } catch (err) {
+        console.error("Dashboard fetch failed:", err);
+      }
+    };
+
+    if (isAuthenticated) {
+      fetchDashboard();
+    }
+  }, [isAuthenticated]);
+
+  if (loading || dashboardLoading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="text-lg">Loading...</div>
@@ -61,6 +93,22 @@ export default function Dashboard() {
               </div>
             )}
 
+            {dashboard && (
+              <div className="bg-yellow-50 p-4 rounded-lg">
+                <h2 className="text-lg font-semibold text-yellow-800 mb-2">
+                  Dashboard Info
+                </h2>
+                <div className="text-yellow-700 space-y-1">
+                  <p>
+                    <strong>ID:</strong> {dashboard.dashboard_id}
+                  </p>
+                  <p>
+                    <strong>Owner ID:</strong> {dashboard.owner_id}
+                  </p>
+                </div>
+              </div>
+            )}
+
             <div className="bg-gray-50 p-4 rounded-lg">
               <h2 className="text-lg font-semibold text-gray-800 mb-2">
                 Quick Actions
@@ -75,7 +123,7 @@ export default function Dashboard() {
                 <button
                   onClick={() => {
                     deleteCookie("access_token");
-                    setUser(null); // 🧠 Reset the user in AuthContext
+                    setUser(null);
                     router.push("/");
                   }}
                   className="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition-colors"
